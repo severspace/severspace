@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remeras | Sever Space</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.ico">
+  <style>
+    html { scroll-behavior: smooth; }
+
+    /* Hover: mostrar segunda imagen solo si existe img-back */
+    .product-card .img-back {
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .product-card .img-front {
+      transition: opacity 0.35s ease;
+    }
+    .product-card:has(.img-back):hover .img-front {
+      opacity: 0;
+    }
+    .product-card:has(.img-back):hover .img-back {
+      opacity: 1;
+    }
+
+    /* Animación fade-in al aparecer los productos ocultos */
+    .product-hidden {
+      display: none;
+    }
+    .product-visible {
+      display: block;
+      animation: fadeInUp 0.4s ease both;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sidebar menu */
+    .collection-tab {
+      border-radius: 0;
+    }
+    .collection-tab.active {
+      border-left-color: #000 !important;
+      background-color: #f8f8f8;
+      color: #000;
+      font-weight: 500;
+    }
+
+    /* Secciones ocultas/visibles */
+    .collection-section {
+      animation: fadeInUp 0.3s ease both;
+    }
+    .collection-section.hidden {
+      display: none;
+    }
+
+    /* En mobile el sidebar va arriba */
+    @media (max-width: 640px) {
+      .sidebar-layout {
+        flex-direction: column;
+      }
+      .sidebar-layout aside {
+        width: 100%;
+        position: static;
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+        overflow-x: auto;
+      }
+      .sidebar-layout aside nav {
+        flex-direction: row;
+        width: 100%;
+      }
+      .sidebar-layout aside .collection-tab {
+        flex: 1;
+        text-align: center;
+        border-left: none !important;
+        border-bottom: 2px solid transparent;
+        padding: 10px 8px;
+        font-size: 12px;
+      }
+      .sidebar-layout aside .collection-tab.active {
+        border-bottom-color: #000 !important;
+        border-left: none !important;
+      }
+    }
+
+    .zodiac-hidden,
+    .fixie-hidden {
+      display: none;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Contenedor de imagen: proporción 3:4 y altura estable en el grid */
+    .product-card .relative.overflow-hidden {
+      width: 100%;
+      flex-shrink: 0;
+    }
+    .product-card .relative.overflow-hidden .img-front {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .product-card .relative.overflow-hidden .img-back {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .product-card .product-meta {
+      margin-top: 0.28rem;
+      display: block;
+    }
+    .product-card > p.text-sm {
+      margin-top: 0.5rem;
+    }
+    .product-card > p + p {
+      margin-top: 0.25rem;
+    }
+    .variant-btn.active {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+    }
+
+    #mobile-menu {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#mobile-menu.menu-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+  </style>
+</head>
+
+<body class="bg-white text-black font-sans">
+
+<!-- TOP BAR -->
+<div class="bg-black text-white text-sm py-2 flex justify-center items-center gap-2">
+  <i data-lucide="truck" class="w-4 h-4"></i>
+  ENVÍOS GRATIS A PARTIR DE $2.500
+</div>
+
+<!-- HEADER -->
+<header class="py-4 px-6 border-b relative">
+
+  <!-- HEADER -->
+  <nav class="max-w-5xl mx-auto flex justify-between items-center text-sm py-2">
+
+    <!-- HAMBURGER (solo mobile) -->
+    <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 relative" style="z-index:60" aria-label="Abrir menú">
+      <span class="block w-6 h-0.5 bg-black transition-all duration-300" id="hb1"></span>
+      <span class="block w-6 h-0.5 bg-black transition-all duration-300" id="hb2"></span>
+      <span class="block w-6 h-0.5 bg-black transition-all duration-300" id="hb3"></span>
+    </button>
+    <!-- LEFT -->
+    <div class="hidden md:flex gap-6">
+      <a href="catalogo-remeras.html" class="hover:opacity-60 font-[Poppins] underline underline-offset-4 decoration-2">REMERAS</a>
+      <a href="catalogo-buzos.html" class="hover:opacity-60 font-[Poppins]">BUZOS</a>
+      <a href="catalogo-canguros.html" class="hover:opacity-60 font-[Poppins]">CANGUROS</a>
+    </div>
+
+    <!-- CENTER: LOGO -->
+    <a href="index.html" class="absolute left-1/2 -translate-x-1/2">
+      <img src="img/sever-space-logo-up.png" alt="Sever Space" class="h-10 md:h-12 object-contain">
+    </a>
+
+    <!-- RIGHT -->
+    <div class="flex items-center gap-6">
+      <div class="hidden md:flex gap-6">
+        <a href="como-comprar.html" class="hover:opacity-60 font-[Poppins]">CÓMO COMPRAR</a>
+        <a href="envios.html" class="hover:opacity-60 font-[Poppins]">ENVÍOS</a>
+        <a href="cambios.html" class="hover:opacity-60 font-[Poppins]">CAMBIOS</a>
+      </div>
+
+      <button id="cart-button" class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-7 w-7 text-black hover:scale-110 transition"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 8h14l-1 12H6L5 8zm2 0V6a5 5 0 0110 0v2"/>
+        </svg>
+        <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+          0
+        </span>
+      </button>
+    </div>
+
+  </nav>
+
+  <div id="cart-dropdown" class="hidden fixed top-[90px] right-6 z-50 w-80 max-w-[90vw] rounded-2xl border border-black/10 bg-white shadow-xl">
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-semibold">Tu carrito</h3>
+        <button id="cart-close" class="text-xs uppercase tracking-[0.2em] text-black/50 hover:text-black">✕</button>
+      </div>
+      <div id="cart-items" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+        <p id="cart-empty" class="text-sm text-slate-500">No hay productos en el carrito.</p>
+      </div>
+      <div class="mt-4 border-t border-slate-200 pt-4">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Estimado total</span>
+          <span id="cart-total" class="font-semibold">$0</span>
+        </div>
+        <p class="mt-2 font-light text-black text-[0.8rem]">
+          Los impuestos, descuentos y gastos de envío se calculan al finalizar la compra.
+        </p>
+      </div>
+
+      <div class="mt-4 border-t border-slate-200 pt-4">
+        <a
+          href="checkout.html"
+          id="checkout-button"
+          class="block w-full text-center bg-black text-white py-3 text-sm font-medium tracking-wide hover:bg-black/90 transition"
+        >
+          Finalizar compra
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- MENÚ MOBILE OVERLAY -->
+  <div id="mobile-menu" class="fixed inset-0 bg-white z-50 flex flex-col pt-32 px-8 pb-8 md:hidden overflow-y-auto">
+    <div class="flex flex-col gap-6 text-lg font-[Poppins] font-medium">
+      <a href="catalogo-remeras.html" class="border-b border-slate-100 pb-4 hover:opacity-60">REMERAS</a>
+      <a href="catalogo-buzos.html" class="border-b border-slate-100 pb-4 hover:opacity-60">BUZOS</a>
+      <a href="catalogo-canguros.html" class="border-b border-slate-100 pb-4 hover:opacity-60">CANGUROS</a>
+      <a href="como-comprar.html" class="border-b border-slate-100 pb-4 hover:opacity-60">CÓMO COMPRAR</a>
+      <a href="envios.html" class="border-b border-slate-100 pb-4 hover:opacity-60">ENVÍOS</a>
+      <a href="cambios.html" class="border-b border-slate-100 pb-4 hover:opacity-60">CAMBIOS</a>
+    </div>
+    
+  </div>
+</header>
+
+<!-- TÍTULO SECCIÓN -->
+<section class="py-10 px-6 border-b border-slate-100">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-light tracking-wide font-[Poppins]">REMERAS</h1>
+  </div>
+</section>
+
+<!-- LAYOUT PRINCIPAL: SIDEBAR + FEED -->
+<div class="max-w-7xl mx-auto px-6 py-10 flex gap-8 items-start sidebar-layout">
+
+  <!-- SIDEBAR MENU -->
+  <aside class="w-44 shrink-0 sticky top-6">
+    <p class="text-xs font-medium tracking-[0.15em] text-slate-400 uppercase mb-3">Colecciones</p>
+    <nav class="flex flex-col gap-1">
+      <button onclick="showCollection('zodiaco')" id="tab-zodiaco"
+        class="collection-tab text-left px-4 py-2.5 text-sm font-[Poppins] border-l-2 border-black bg-slate-50 text-black transition-all active">
+        Zodiaco
+      </button>
+      <button onclick="showCollection('fixie')" id="tab-fixie"
+        class="collection-tab text-left px-4 py-2.5 text-sm font-[Poppins] border-l-2 border-transparent text-slate-500 hover:text-black hover:bg-slate-50 transition-all">
+        Fixie
+      </button>
+      <button onclick="showCollection('general')" id="tab-general"
+        class="collection-tab text-left px-4 py-2.5 text-sm font-[Poppins] border-l-2 border-transparent text-slate-500 hover:text-black hover:bg-slate-50 transition-all">
+        Originals
+      </button>
+    </nav>
+  </aside>
+
+  <!-- FEED (contenido dinámico) -->
+  <div class="flex-1 min-w-0">
+
+  <!-- COLECCIÓN DEL ZODIACO -->
+  <div id="section-zodiaco" class="collection-section">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl font-light tracking-wide font-[Poppins] mb-2">Colección Zodiaco</h2>
+    <p class="text-sm text-slate-500 mb-6" id="zodiac-count">12 productos</p>
+
+    <div id="zodiac-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- ZODIACO 1 -->
+      <div class="product-card group relative zodiac-visible">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-aries.png" alt="Aries" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-aries" aria-label="Agregar Aries">+</button>
+        <p class="text-sm">Remera Aries</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 2 -->
+      <div class="product-card group relative zodiac-visible">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-tauro.png" alt="Tauro" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-tauro" aria-label="Agregar Tauro">+</button>
+        <p class="text-sm">Remera Tauro</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 3 -->
+      <div class="product-card group relative zodiac-visible">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-geminis.png" alt="Géminis" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-geminis" aria-label="Agregar Géminis">+</button>
+        <p class="text-sm">Remera Géminis</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 4 -->
+      <div class="product-card group relative zodiac-visible">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-cancer.png" alt="Cáncer" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-cancer" aria-label="Agregar Cáncer">+</button>
+        <p class="text-sm">Remera Cáncer</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 5 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-leo.png" alt="Leo" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-leo" aria-label="Agregar Leo">+</button>
+        <p class="text-sm">Remera Leo</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 6 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-virgo.png" alt="Virgo" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-virgo" aria-label="Agregar Virgo">+</button>
+        <p class="text-sm">Remera Virgo</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 7 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-libra.png" alt="Libra" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-libra" aria-label="Agregar Libra">+</button>
+        <p class="text-sm">Remera Libra</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 8 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-escorpio.png" alt="Escorpio" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-escorpio" aria-label="Agregar Escorpio">+</button>
+        <p class="text-sm">Remera Escorpio</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 9 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-sagitario.png" alt="Sagitario" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-sagitario" aria-label="Agregar Sagitario">+</button>
+        <p class="text-sm">Remera Sagitario</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 10 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-capricornio.png" alt="Capricornio" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-capricornio" aria-label="Agregar Capricornio">+</button>
+        <p class="text-sm">Remera Capricornio</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 11 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-acuario.png" alt="Acuario" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-acuario" aria-label="Agregar Acuario">+</button>
+        <p class="text-sm">Remera Acuario</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ZODIACO 12 -->
+      <div class="product-card group relative zodiac-hidden">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-piscis.png" alt="Piscis" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="zodiac-piscis" aria-label="Agregar Piscis">+</button>
+        <p class="text-sm">Remera Piscis</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+    </div>
+
+    <!-- BOTÓN VER MÁS eliminado por solicitud -->
+
+  </div>
+  </div><!-- /section-zodiaco -->
+
+  <!-- COLECCIÓN FIXIE -->
+  <div id="section-fixie" class="collection-section hidden">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl font-light tracking-wide font-[Poppins] mb-2">Colección Fixie</h2>
+    <p class="text-sm text-slate-500 mb-6" id="fixie-count">6 productos</p>
+
+    <div id="fixie-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- FIXIE 1 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/remera-freno-atras.png" class="img-front w-full rounded-xl block">
+  <img src="img/remera-freno-adelante.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-no-brakes-no-mercy" aria-label="Agregar Remera 'No Brakes, No Mercy'">+</button>
+        <p class="text-sm">Remera 'No Brakes, No Mercy' Colección Fixie </p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- FIXIE 2 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/mockup-fixie-jinete.png" class="img-front w-full rounded-xl block">
+  <img src="img/mockup-fixie-jinete.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-ride-fast-die-last" aria-label="Agregar Remera 'Ride Fast, Die Last'">+</button>
+        <p class="text-sm">Remera 'Ride Fast, Die Last' Colección Fixie</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- FIXIE 3 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/mockup-carancho-atras.png" class="img-front w-full rounded-xl block">
+  <img src="img/mockup-carancho-delante.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-fixed-instinct" aria-label="Agregar Remera 'Fixed Instinct'">+</button>
+        <p class="text-sm">Remera 'Fixed Instinct' Colección Fixie</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- FIXIE 4 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/mockup-rideordie.png" class="img-front w-full rounded-xl block">
+  <img src="img/mockup-rideordie.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-ride-or-die" aria-label="Agregar Remera 'Ride or Die' Colección Fixie">+</button>
+        <p class="text-sm">Remera 'Ride or Die' Colección Fixie</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+      
+
+      <!-- FIXIE 5 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/mockup-prontosesubira.png" class="img-front w-full rounded-xl block">
+  <img src="img/mockup-prontosesubira.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="drop-limited" aria-label="Agregar Remera Drop Limited">+</button>
+        <p class="text-sm">Remera Drop Limited</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.500</p>
+      </div>
+
+      <!-- FIXIE 6 -->
+      <div class="product-card group relative fixie-visible">
+        <div class="relative overflow-hidden rounded-xl mb-3">
+  <img src="img/mockup-prontosesubira.png" class="img-front w-full rounded-xl block">
+  <img src="img/mockup-prontosesubira.png" class="img-back absolute inset-0 w-full h-full object-contain rounded-xl">
+</div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="minimal-core" aria-label="Agregar Remera Minimal Core">+</button>
+        <p class="text-sm">Remera Minimal Core</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.400</p>
+      </div>
+
+    </div>
+
+    <!-- BOTÓN VER MÁS (futuro) -->
+    <div class="text-center mt-10 hidden" id="fixie-ver-mas-wrapper">
+      <button id="fixie-ver-mas-btn"
+        class="bg-black text-white px-10 py-3 text-sm font-medium tracking-wide hover:bg-black/80 transition">
+        Ver más
+      </button>
+    </div>
+
+  </div>
+  </div><!-- /section-fixie -->
+
+  <!-- REMERAS GENERALES -->
+  <div id="section-general" class="collection-section hidden">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl font-light tracking-wide font-[Poppins] mb-2">Remeras</h2>
+    <p class="text-sm text-slate-500 mb-6">Diseños hechos por la casa</p>
+    <div id="additional-grid-inner" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- ADICIONAL 1 -->
+      <div class="product-card group relative">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-ss-letras-degradado.png" alt="Remera Sever Space degradé" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-ss-degrade" aria-label="Agregar Remera Sever Space degradé">+</button>
+        <p class="text-sm">Remera Sever Space degradé</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ADICIONAL 2 -->
+      <div class="product-card group relative">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-sstag.png" alt="Remera Sever Space TAG" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-ss-tag" aria-label="Agregar Remera Sever Space TAG">+</button>
+        <p class="text-sm">Remera Sever Space TAG</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ADICIONAL 3 -->
+      <div class="product-card group relative">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-logo02.png" alt="Remera Sever Space #02 — Negra" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-logo02-negra" aria-label="Agregar Remera Sever Space #02 — Negra">+</button>
+        <p class="text-sm">Remera Sever Space #02</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+      <!-- ADICIONAL 4 -->
+      <div class="product-card group relative">
+        <div class="rounded-xl mb-3">
+          <img src="img/mockup-respect-the-limits.png" alt="Remera 'Respect The Limits'" class="img-front w-full rounded-xl block">
+        </div>
+        <button type="button" class="add-to-cart absolute top-3 right-3 z-10 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center text-xl text-black shadow transition" data-product-id="remera-respect-the-limits" aria-label="Agregar Remera 'Respect The Limits'">+</button>
+        <p class="text-sm">Remera 'Respect The Limits'</p>
+        <p class="text-xs text-slate-400 mb-1">Unisex · Algodón</p>
+        <p class="font-semibold">$1.395</p>
+      </div>
+
+    </div><!-- /additional-grid-inner -->
+  </div>
+  </div><!-- /section-general -->
+
+  </div><!-- /feed -->
+</div><!-- /layout principal -->
+
+<!-- FOOTER -->
+<footer class="bg-black text-white pt-4 pb-6 px-6">
+
+  <!-- LOGO CENTRADO -->
+<div class="flex justify-center mb-6">
+  <a href="index.html"><img src="img/sever-space-logo-gif-footer.gif"
+     class="h-24 w-auto object-contain opacity-100"></a>
+</div>
+
+</div>
+
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-10">
+
+    <!-- LINKS -->
+    <div class="flex flex-col gap-3 text-xs">
+      <a href="como-comprar.html" class="text-white hover:underline">Cómo comprar</a>
+      <a href="nosotros.html" class="text-white hover:underline">Nosotros</a>
+      <a href="politicas.html" class="text-white hover:underline">Políticas</a>
+      <a href="cambios.html" class="text-white hover:underline">Cambios</a>
+      <a href="envios.html" class="text-white hover:underline">Envíos</a>
+      <a href="preguntas-frecuentes.html" class="text-white hover:underline">Preguntas Frecuentes</a>
+      <a href="metodos-de-pago.html" class="text-white hover:underline">Métodos de pago</a>
+    </div>
+
+    <!-- SOCIAL -->
+<div class="flex flex-col items-start md:items-end">
+
+  <!-- TÍTULO -->
+  <h3 class="text-xs text-white/50 mb-2 tracking-[0.2em] uppercase font-[Poppins]">
+    Contactos
+  </h3>
+
+  <!-- ICONOS -->
+  <div class="flex gap-3 items-center">
+    <a href="https://www.instagram.com/severspace/"><img src="img/logo-ig-footer.png" class="w-6 h-6 hover:opacity-70 transition"></a>
+    <a href="https://wa.me/598XXXXXXXX"><img src="img/wpp-logo-footer.png" class="w-6 h-6 hover:opacity-70 transition"></a>
+    <a href="mailto:severspaceuy@gmail.com"><img src="img/gmail-logo-footer.png" class="w-7 h-7 hover:opacity-70 transition"></a>
+    <a href="https://www.facebook.com/profile.php?id=61590408000537"><img src="img/logo-fb-footer.png" class="w-6 h-6 hover:opacity-70 transition"></a>
+  </div>
+
+  <!-- CORREO -->
+<h3 class="text-xs text-white/80 mb-2 tracking-[0.1em] font-[Poppins]">
+    severspaceuy@gmail.com
+  </h3>
+<a href="https://www.mercadopago.com.uy" target="_blank" rel="noreferrer"
+   class="flex flex-col items-end mt-4 hover:opacity-80 transition">
+  <span class="text-white/50 text-[0.6rem] uppercase tracking-widest mb-1 font-[Poppins]">Compra protegida con:</span>
+  <img src="img/Mercado-Pago-Logo-footer.png" alt="Mercado Pago" class="h-8 object-contain opacity-100">
+</a>
+</div>
+
+  </div>
+
+<div class="mt-8 border-t border-white/10 pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-white/60 gap-2">
+  
+  <!-- DERECHOS -->
+  <p>
+    © 2026 Sever Space. Todos los derechos reservados.
+  </p>
+
+  <!-- CRÉDITO -->
+  <div class="flex items-center gap-2">
+    <span>by</span>
+    
+    <!-- LOGO NUMAKESTUDIO -->
+    <a href="https://numakestudio.com/" target="_blank">
+  <img src="img/logo-numake-footer.png" alt="NumakeStudio" class="h-3 grayscale opacity-70">
+</a>
+
+  </div>
+
+</div>
+</footer>
+
+<script src="js/severspace-data.js"></script>
+<script>
+  const products = SEVER_PRODUCTS;
+  const PRODUCT_ID_ALIASES = {
+    "remera-void": "remera-ss-degrade",
+    "remera-oversize-basic": "remera-ss-tag",
+    "remera-ss-classic": "remera-logo02-negra"
+  };
+
+  // ── CARRITO ──────────────────────────────────────────
+  const cartButton      = document.getElementById("cart-button");
+  const cartDropdown    = document.getElementById("cart-dropdown");
+  const cartClose       = document.getElementById("cart-close");
+  const cartItemsContainer = document.getElementById("cart-items");
+  const cartEmpty       = document.getElementById("cart-empty");
+  const cartTotal       = document.getElementById("cart-total");
+  const cartCount       = document.getElementById("cart-count");
+
+  function generateLineId() {
+    return `line-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  let cart = JSON.parse(localStorage.getItem("severspaceCart") || "[]");
+  if (!Array.isArray(cart)) {
+    cart = Object.values(cart).map(item => ({
+      lineId: generateLineId(), id: item.id, quantity: item.quantity, size: item.size || "M"
+    }));
+  }
+  cart = cart
+    .map(item => ({
+      ...item,
+      id: PRODUCT_ID_ALIASES[item.id] || item.id,
+      lineId: item.lineId || generateLineId(),
+      size: item.size || "M"
+    }))
+    .filter(item => products[item.id]);
+  saveCart();
+
+  function formatPrice(value) {
+    return `$${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  }
+
+  function saveCart() {
+    localStorage.setItem("severspaceCart", JSON.stringify(cart));
+  }
+
+  function getTotalItems() {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  function updateCartCount() {
+    cartCount.textContent = getTotalItems();
+  }
+
+  function renderCart() {
+    if (cart.length === 0) {
+      cartEmpty.classList.remove("hidden");
+      cartItemsContainer.innerHTML = "";
+      cartTotal.textContent = formatPrice(0);
+      return;
+    }
+    cartEmpty.classList.add("hidden");
+    const rows = cart.map(item => {
+      const product = products[item.id];
+      if (!product) return "";
+      const subtot = product.price * item.quantity;
+      const size = item.size || "M";
+      return `
+        <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
+          <img src="${product.image}" alt="${product.name}" class="h-16 w-16 rounded-lg object-cover">
+          <div class="grow">
+            <p class="text-sm font-medium">${product.name}</p>
+            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span>${formatPrice(product.price)} c/u</span>
+              <label class="sr-only" for="size-${item.lineId}">Talle</label>
+              <select id="size-${item.lineId}" data-action="size" data-line-id="${item.lineId}" class="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700">
+                <option value="S" ${size==="S"?"selected":""}>S</option>
+                <option value="M" ${size==="M"?"selected":""}>M</option>
+                <option value="L" ${size==="L"?"selected":""}>L</option>
+                <option value="XL" ${size==="XL"?"selected":""}>XL</option>
+                <option value="XXL" ${size==="XXL"?"selected":""}>XXL</option>
+              </select>
+            </div>
+            <p class="text-sm font-semibold mt-2">${formatPrice(subtot)}</p>
+            <div class="mt-2 flex items-center gap-2 text-sm">
+              <button type="button" data-action="decrease" data-line-id="${item.lineId}" class="px-2 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">-</button>
+              <span class="w-6 text-center">${item.quantity}</span>
+              <button type="button" data-action="increase" data-line-id="${item.lineId}" class="px-2 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">+</button>
+            </div>
+          </div>
+        </div>`;
+    }).join("");
+    cartItemsContainer.innerHTML = rows;
+    const total = cart.reduce((sum, item) => {
+      const product = products[item.id];
+      return product ? sum + product.price * item.quantity : sum;
+    }, 0);
+    cartTotal.textContent = formatPrice(total);
+  }
+
+  function changeQuantity(lineId, delta) {
+    const idx = cart.findIndex(i => i.lineId === lineId);
+    if (idx === -1) return;
+    cart[idx].quantity += delta;
+    if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+    saveCart(); updateCartCount(); renderCart();
+  }
+
+  function addToCart(productId) {
+    if (!products[productId]) return;
+    cart.push({ lineId: generateLineId(), id: productId, quantity: 1, size: "M" });
+    saveCart(); updateCartCount(); renderCart();
+    cartDropdown.classList.remove("hidden");
+  }
+
+  document.addEventListener("click", e => {
+    const addBtn = e.target.closest(".add-to-cart");
+    if (!addBtn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(addBtn.dataset.productId);
+  });
+
+  cartButton.addEventListener("click", e => { e.stopPropagation(); cartDropdown.classList.toggle("hidden"); });
+  cartClose.addEventListener("click", e => { e.stopPropagation(); cartDropdown.classList.add("hidden"); });
+  cartDropdown.addEventListener("click", e => e.stopPropagation());
+
+  cartItemsContainer.addEventListener("click", e => {
+    e.stopPropagation();
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const lineId = btn.dataset.lineId;
+    if (btn.dataset.action === "increase") changeQuantity(lineId, 1);
+    else if (btn.dataset.action === "decrease") changeQuantity(lineId, -1);
+  });
+
+  cartItemsContainer.addEventListener("change", e => {
+    const sel = e.target.closest("select[data-action='size']");
+    if (!sel) return;
+    const idx = cart.findIndex(i => i.lineId === sel.dataset.lineId);
+    if (idx === -1) return;
+    cart[idx].size = sel.value;
+    saveCart();
+  });
+
+  document.addEventListener("click", e => {
+    if (e.target.closest(".add-to-cart") || e.target.closest(".variant-btn")) return;
+    if (!cartDropdown.contains(e.target) && !cartButton.contains(e.target)) {
+      cartDropdown.classList.add("hidden");
+    }
+  });
+
+  // ── VER MÁS ──────────────────────────────────────────
+  const zodiacVerMasBtn     = document.getElementById("zodiac-ver-mas-btn");
+  const zodiacVerMasWrapper = document.getElementById("zodiac-ver-mas-wrapper");
+  const fixieVerMasBtn = document.getElementById("fixie-ver-mas-btn");
+  const fixieVerMasWrapper = document.getElementById("fixie-ver-mas-wrapper");
+
+  // Para Zodiaco (mostrar productos ocultos)
+  if (zodiacVerMasBtn && zodiacVerMasWrapper) {
+    zodiacVerMasBtn.addEventListener("click", () => {
+      document.querySelectorAll("#zodiac-grid .zodiac-hidden").forEach(card => {
+        card.classList.remove("zodiac-hidden");
+        card.classList.add("zodiac-visible");
+      });
+      zodiacVerMasWrapper.classList.add("hidden");
+    });
+  }
+
+  // Para Fixie (si agregás productos ocultos)
+  if (fixieVerMasBtn && fixieVerMasWrapper) {
+    fixieVerMasBtn.addEventListener("click", () => {
+      document.querySelectorAll("#fixie-grid .fixie-hidden").forEach(card => {
+        card.classList.remove("fixie-hidden");
+        card.classList.add("fixie-visible");
+      });
+      fixieVerMasWrapper.classList.add("hidden");
+    });
+  }
+
+  // ── LINKS DE PRODUCTOS ─────────────────────────────────
+  document.querySelectorAll(".product-card").forEach(card => {
+    const addBtn = card.querySelector(".add-to-cart");
+    const productId = addBtn?.dataset.productId;
+    if (!productId) return;
+    const link = document.createElement("a");
+    link.href = `producto.html?id=${encodeURIComponent(productId)}`;
+    link.className = "block";
+    const nodes = Array.from(card.children).filter(node => {
+      return node !== addBtn && !node.classList.contains("no-link");
+    });
+    nodes.forEach(node => link.appendChild(node));
+    card.insertBefore(link, addBtn);
+  });
+
+  // variantes removidas del catálogo (la selección de color aparece solo en producto.html)
+
+  // ── MENU LATERAL DE COLECCIONES ──────────────────────
+  function showCollection(key) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.collection-section').forEach(sec => {
+      sec.classList.add('hidden');
+    });
+    // Desactivar todos los tabs
+    document.querySelectorAll('.collection-tab').forEach(tab => {
+      tab.classList.remove('active');
+      tab.style.borderLeftColor = 'transparent';
+      tab.style.backgroundColor = '';
+      tab.style.color = '';
+      tab.style.fontWeight = '';
+    });
+    // Mostrar la sección seleccionada
+    document.getElementById('section-' + key).classList.remove('hidden');
+    // Activar el tab seleccionado
+    const activeTab = document.getElementById('tab-' + key);
+    activeTab.classList.add('active');
+  }
+  // Mostrar zodiaco por defecto
+  showCollection('zodiaco');
+
+  updateCartCount();
+  renderCart();
+  
+  // Mobile menu
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const hb1 = document.getElementById('hb1');
+  const hb2 = document.getElementById('hb2');
+  const hb3 = document.getElementById('hb3');
+  if (menuToggle && mobileMenu) {
+    menuToggle.addEventListener('click', () => {
+  const open = mobileMenu.classList.contains('menu-open');
+  mobileMenu.classList.toggle('menu-open', !open);
+  hb1.style.transform = !open ? 'translateY(8px) rotate(45deg)' : '';
+  hb2.style.opacity = !open ? '0' : '1';
+  hb3.style.transform = !open ? 'translateY(-8px) rotate(-45deg)' : '';
+  document.body.style.overflow = !open ? 'hidden' : '';
+});
+  }
+  lucide.createIcons();
+</script>
+
+</body>
+</html>
